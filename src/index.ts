@@ -1,15 +1,17 @@
 import fse from 'fs-extra';
 import comments from 'comment-parser';
 
-const TAG_TYPES = ['level', 'tags', 'similars'];
-const MARKER_START = '<!-- @tb-start -->';
-const MARKER_END = '<!-- @tb-end -->';
-
-const parseComment = function parseComment(
-  sourcePath: string,
-  targetPath: string,
-): any {
-  const tags: any = {};
+const parseComment = function parseComment({
+  sourcePath,
+  targetPath,
+  context,
+}: {
+  sourcePath: string;
+  targetPath: string;
+  context: any;
+}): any {
+  const opts = context.opts;
+  const store: any = {};
 
   // @ts-ignore
   comments.file(
@@ -24,35 +26,38 @@ const parseComment = function parseComment(
 
             const id = first[2].replace('id=', '');
             const lang = first[3].replace('lang=', '');
-            const topic = second.slice(1).join(' ');
+            const title = second.slice(1).join(' ');
             const uri = lines[2];
 
-            Object.assign(tags, { id, lang, topic, uri });
+            Object.assign(store, { id, title, uri, lang });
           }
 
-          TAG_TYPES.forEach((type: string) => {
+          // TODO: 不能写死
+          ['level', 'tags', 'similars'].forEach((type: string) => {
             if (new RegExp(`^@${type}[\\s\\S]*`).test(str)) {
               const keys = str
                 .split(/['"]([^'"]+)['"]/gi)
                 .filter((key) => !/^\s+$/.test(key) && key !== '')
                 .slice(1);
 
-              Object.assign(tags, { [type]: keys });
+              Object.assign(store, { [type]: keys });
             }
           });
 
-          return { source: ' @', data: { tag: tags } };
+          return { source: ' @', data: { tag: store } };
         },
       ],
     },
     (error: any, data: any, finish: any) => {
       if (error && error.message) {
-        console.error(error.message);
+        console.error(`TBuilder ERR!: ${error.message}`);
       }
 
       if (data) {
-        if (!Object.keys(tags).length) {
-          console.info("TBuilder INFO: can't find valid tag in target file");
+        if (!Object.keys(store).length) {
+          console.warn(
+            `TBuilder WARN: can't find valid tag in "${sourcePath}"`,
+          );
           return;
         }
 
@@ -62,45 +67,56 @@ const parseComment = function parseComment(
         const fileBuffer = fse.readFileSync(targetPath);
         const fileContent = Buffer.from(fileBuffer).toString();
 
-        const startPos = fileContent.indexOf(MARKER_START);
-        const endPos = fileContent.indexOf(MARKER_END);
+        const startPos = fileContent.indexOf(opts.marker.start);
+        const endPos = fileContent.indexOf(opts.marker.end);
 
         let insertContent = '';
-        const beforeContent = fileContent.slice(0, startPos);
-        const afterContent = fileContent.slice(endPos + MARKER_END.length);
-        const targetContent = fileContent
-          .slice(startPos + MARKER_START.length, endPos)
+        const beforeTable = fileContent.slice(0, startPos);
+        const afterTable = fileContent.slice(endPos + opts.marker.end.length);
+        const oldTable = fileContent
+          .slice(startPos + opts.marker.start.length, endPos)
           .trim();
+        const sign: any = {
+          id: store.id || '',
+          title: `[${store.title}](${store.uri})`,
+          level: store.level || '',
+          lang: `[${store.lang}](${sourcePath})`,
+          tags: '',
+          similars: '',
+        };
 
-        let levelStr = '';
-        let tagStr = '';
-        let similarStr = '';
-
-        if (tags.level) {
-          levelStr = tags.level;
-        }
-        if (Array.isArray(tags.tags) && tags.tags.length) {
-          tags.tags.forEach((tag: string) => {
-            tagStr += `\`${tag}\`, `;
+        if (Array.isArray(store.tags) && store.tags.length) {
+          store.tags.forEach((tag: string) => {
+            sign.tags += `\`${tag}\`, `;
           });
-          tagStr = tagStr.trim().slice(0, -1);
+          sign.tags = sign.tags.trim().slice(0, -1);
         }
-        if (Array.isArray(tags.similars) && tags.similars.length) {
-          tags.similars.forEach((similar: string) => {
-            similarStr += `\`${similar}\`, `;
+        if (Array.isArray(store.similars) && store.similars.length) {
+          store.similars.forEach((similar: string) => {
+            sign.similars += `\`${similar}\`, `;
           });
-          similarStr = similarStr.trim().slice(0, -1);
+          sign.similars = sign.similars.trim().slice(0, -1);
         }
 
-        insertContent += `${MARKER_START}\n${targetContent}\n`;
-        insertContent += `|${tags.id}|[${tags.topic}](${tags.uri})|${levelStr}|[${tags.lang}](${sourcePath})|${tagStr}|${similarStr}|`;
-        insertContent += `\n${MARKER_END}`;
+        let newTable = '|';
+        opts.signs.forEach((key: string) => {
+          newTable += `${sign[key]}|`;
+        });
 
-        const newFileContent = beforeContent + insertContent + afterContent;
+        if (opts.overwrite) {
+          context.cache = `${context.cache}${newTable}\n`;
+        }
 
-        console.log('TBuilder INFO: start generate table by comments...');
+        insertContent += `${opts.marker.start}\n`;
+        insertContent += `${opts.overwrite ? opts.thead : oldTable}\n`;
+        insertContent += `${opts.overwrite ? context.cache : newTable}`;
+        insertContent += `\n${opts.marker.end}`;
+
+        const newFileContent = beforeTable + insertContent + afterTable;
+
+        console.info(`TBuilder INFO: start parse "${sourcePath}" file`);
         fse.writeFileSync(targetPath, newFileContent, { encoding: 'utf8' });
-        console.log('TBuilder INFO: table generate successfully!');
+        console.info('TBuilder DONE: table generate successfully!');
       }
 
       if (finish) {
@@ -109,7 +125,7 @@ const parseComment = function parseComment(
     },
   );
 
-  return tags;
+  return store;
 };
 
 const readPath = function readPath(path: string, trace: string): any {
@@ -139,18 +155,54 @@ const readPath = function readPath(path: string, trace: string): any {
   return paths;
 };
 
-class TBuilder {
+/**
+ * @author liuyib <https://github.com/liuyib/>
+ * @example
+ *   const tbuilder = new TBuilder({
+ *     signs: ['id', 'title'],
+ *     thead: '|#|题目|\n|:---:|:---:|',
+ *   });
+ *
+ *   tbuilder.build({
+ *     sourcePath: './javascript',
+ *     targetPath: './README.md',
+ *     context: tbuilder,
+ *   });
+ */
+export default class TBuilder {
+  public opts: any;
+  public cache: string;
+
   constructor(options: unknown) {
-    const DEFAULT_OPTS = {
-      // 是否重新生成并覆盖原来所有的数据
-      // TODO: 目前只能重新覆盖所有
-      overwrite: false,
+    const DEFAULT_OPTION = {
+      // 是否覆盖之前的数据（true：每次都遍历所有文件，重新生成数据。false：将新数据追加到旧数据后面）
+      overwrite: true,
+      // 需要解析的标签（数量和顺序要和下面的 thead 保持一致）
+      signs: ['id', 'title', 'level', 'lang', 'tags', 'similars'],
+      // 表格头（Markdown 语法）
+      thead: `|#|题目|难度|解答|标签|相似|\n|:---:|:---|:---:|:---:|:---:|:---:|`,
+      // 生成数据的标记点
+      marker: {
+        start: '<!-- @tb-start -->',
+        end: '<!-- @tb-end -->',
+      },
     };
-    const opts: any = Object.assign({}, DEFAULT_OPTS, options);
-    console.log('Your config: ', opts);
+
+    this.opts = Object.assign({}, DEFAULT_OPTION, options);
+    // only used when `opts.overwrite == true`
+    // keep last table data, and pass to next generation.
+    this.cache = '';
   }
 
-  build(sourcePath: string, targetPath: string): void {
+  build({
+    sourcePath,
+    targetPath,
+    context,
+  }: {
+    sourcePath: string;
+    targetPath: string;
+    context: any;
+  }): void {
     if (!sourcePath || !targetPath) {
       console.error('TBuilder ERR!: please pass parameters.');
       return;
@@ -164,11 +216,8 @@ class TBuilder {
 
     if (Array.isArray(paths) && paths.length) {
       paths.forEach((sourcePath: string) => {
-        parseComment(sourcePath, targetPath);
+        parseComment({ sourcePath, targetPath, context });
       });
     }
   }
 }
-
-const tbuilder = new TBuilder({ overwrite: true });
-tbuilder.build('./javascript', './README.md');
