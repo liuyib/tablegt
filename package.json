@@ -1,6 +1,6 @@
 {
   "name": "ts-node-template",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "liuyib <https://github.com/liuyib/>",
   "description": "A template repo for TypeScript",
   "keywords": [
