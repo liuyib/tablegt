@@ -1,31 +1,39 @@
 {
-  "name": "ts-node-template",
+  "name": "tbuilder",
   "version": "0.2.0",
-  "author": "liuyib <https://github.com/liuyib/>",
-  "description": "A template repo for TypeScript",
-  "keywords": [
-    "typescript",
-    "template"
-  ],
+  "description": "Generate tabular data by code comments",
+  "main": "tbuilder.js",
+  "jsdelivr": "dist/tbuilder.js",
+  "unpkg": "dist/tbuilder.js",
   "scripts": {
     "dev": "webpack --watch",
     "test": "jest",
     "style": "prettier --write {src,test}/**/*.{ts,js}",
     "lint": "eslint {src,test}/**/*.{ts,js}",
     "lint:fix": "npm run lint -- --fix",
-    "build": "webpack"
+    "build": "cross-env NODE_ENV=production webpack"
   },
   "husky": {
     "hooks": {
       "pre-commit": "npm run style && npm run lint"
     }
   },
+  "keywords": [
+    "tbuilder",
+    "generator",
+    "algorithm",
+    "table"
+  ],
+  "author": "liuyib <https://github.com/liuyib/>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/liuyib/algorithm-table-builder"
+    "url": "https://github.com/liuyib/tbuilder"
   },
-  "homepage": "https://github.com/liuyib/algorithm-table-builder",
+  "bugs": {
+    "url": "https://github.com/liuyib/tbuilder/issues"
+  },
+  "homepage": "https://github.com/liuyib/tbuilder",
   "dependencies": {
     "@types/fs-extra": "^9.0.4",
     "comment-parser": "^0.7.6",
@@ -37,6 +45,7 @@
     "@types/jest": "^26.0.14",
     "@typescript-eslint/eslint-plugin": "^4.1.1",
     "@typescript-eslint/parser": "^4.1.1",
+    "cross-env": "^7.0.2",
     "eslint": "^7.9.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",

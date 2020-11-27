@@ -1,4 +1,4 @@
-const TBuilder = require('../dist/bundle.js');
+const TBuilder = require('../dist/tbuilder.min.js');
 const tbuilder = new TBuilder();
 
-tbuilder.build('./source/');
+tbuilder.build('./source');

@@ -1,18 +1,22 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
+const isDev = process.env.NODE_ENV !== 'production';
 
 module.exports = {
   target: 'node',
-  mode: 'development',
-  entry: './src/index.ts',
+  mode: process.env.NODE_ENV || 'development',
+  entry: {
+    tbuilder: './src/index.ts',
+  },
   output: {
-    filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
+    filename: '[name].min.js',
     library: 'TBuilder',
     libraryTarget: 'commonjs2',
   },
+  devtool: isDev ? '' : 'source-map',
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.ts', '.js'],
   },
   module: {
     rules: [
