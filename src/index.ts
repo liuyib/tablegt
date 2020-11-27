@@ -1,17 +1,30 @@
 import fse from 'fs-extra';
 import comments from 'comment-parser';
 
-const parseComment = function parseComment({
-  sourcePath,
-  targetPath,
-  context,
-}: {
-  sourcePath: string;
-  targetPath: string;
-  context: any;
-}): any {
+interface IStoreParse {
+  id?: string | number;
+  title?: string;
+  uri?: string;
+  lang?: string;
+  level?: string;
+  tags?: any;
+  similars?: any;
+  [prop: string]: any;
+}
+
+/**
+ * Parse the specified file and generate table data.
+ * @param sourcePath The path to the file that needs to be parsed.
+ * @param targetPath The file path to store the generated data.
+ * @param context
+ */
+const parseComment = function parseComment(
+  sourcePath: string,
+  targetPath: string,
+  context: any,
+): void {
   const opts = context.opts;
-  const store: any = {};
+  const store: IStoreParse = {};
 
   // @ts-ignore
   comments.file(
@@ -32,7 +45,6 @@ const parseComment = function parseComment({
             Object.assign(store, { id, title, uri, lang });
           }
 
-          // TODO: 不能写死
           ['level', 'tags', 'similars'].forEach((type: string) => {
             if (new RegExp(`^@${type}[\\s\\S]*`).test(str)) {
               const keys = str
@@ -56,12 +68,12 @@ const parseComment = function parseComment({
       if (data) {
         if (!Object.keys(store).length) {
           console.warn(
-            `TBuilder WARN: can't find valid tag in "${sourcePath}"`,
+            `TBuilder WARN: can't find valid MARKER in "${sourcePath}"`,
           );
           return;
         }
 
-        // If file not exist, create it. If exist, ignore.
+        // If file not exist, create it. if exist, ignore.
         fse.ensureFileSync(targetPath);
 
         const fileBuffer = fse.readFileSync(targetPath);
@@ -70,13 +82,12 @@ const parseComment = function parseComment({
         const startPos = fileContent.indexOf(opts.marker.start);
         const endPos = fileContent.indexOf(opts.marker.end);
 
-        let insertContent = '';
         const beforeTable = fileContent.slice(0, startPos);
         const afterTable = fileContent.slice(endPos + opts.marker.end.length);
         const oldTable = fileContent
           .slice(startPos + opts.marker.start.length, endPos)
           .trim();
-        const sign: any = {
+        const sign: IStoreParse = {
           id: store.id || '',
           title: `[${store.title}](${store.uri})`,
           level: store.level || '',
@@ -98,6 +109,7 @@ const parseComment = function parseComment({
           sign.similars = sign.similars.trim().slice(0, -1);
         }
 
+        // According to the enabled SIGN, generate data sequentially.
         let newTable = '|';
         opts.signs.forEach((key: string) => {
           newTable += `${sign[key]}|`;
@@ -107,6 +119,7 @@ const parseComment = function parseComment({
           context.cache = `${context.cache}${newTable}\n`;
         }
 
+        let insertContent = '';
         insertContent += `${opts.marker.start}\n`;
         insertContent += `${opts.overwrite ? opts.thead : oldTable}\n`;
         insertContent += `${opts.overwrite ? context.cache : newTable}`;
@@ -124,30 +137,34 @@ const parseComment = function parseComment({
       }
     },
   );
-
-  return store;
 };
 
+/**
+ * Read file path recursively.
+ * @param path The path that needs to be read.
+ * @param trace Store the read path.
+ * @returns A one-dimensional array of all file paths.
+ */
 const readPath = function readPath(path: string, trace: string): any {
-  if (!fse.existsSync(path)) return;
-  // find file, return its relative path.
+  // Is file, return its relative path.
   if (!fse.lstatSync(path).isDirectory()) {
     return [trace];
   }
 
-  const dirContent: any = fse.readdirSync(path);
+  const dirs: any = fse.readdirSync(path);
   const paths: any = [];
 
-  dirContent.forEach((dir: string) => {
+  dirs.forEach((dir: string) => {
     const nextPath = `${path}/${dir}`;
     const nextTrace = `${trace}/${dir}`;
     const isDir = fse.lstatSync(nextPath).isDirectory();
 
     if (isDir) {
+      // If dir, search files recursively.
       const filePath = readPath(nextPath, nextTrace);
       paths.push(...filePath);
     } else {
-      // is file, return its relative path.
+      // Is file, return its relative path.
       paths.push(nextTrace);
     }
   });
@@ -156,7 +173,6 @@ const readPath = function readPath(path: string, trace: string): any {
 };
 
 /**
- * @author liuyib <https://github.com/liuyib/>
  * @example
  *   const tbuilder = new TBuilder({
  *     signs: ['id', 'title'],
@@ -170,18 +186,26 @@ const readPath = function readPath(path: string, trace: string): any {
  *   });
  */
 export default class TBuilder {
+  // Configuration item.
   public opts: any;
+  // The cache data, only be used when `opts.overwrite` is true.
+  // Keep the previous table data and pass it to the next generation.
   public cache: string;
 
   constructor(options: unknown) {
+    /**
+     * Default configuration.
+     * @param {boolean} overwrite     Whether to overwrite old data.
+     * @param {Array}   signs         Parsable sign.
+     * @param {string}  thead         Table header (Markdown syntax).
+     * @param {Object}  marker        Marking point, where data is generated.
+     * @param {string}  marker.start
+     * @param {string}  marker.end
+     */
     const DEFAULT_OPTION = {
-      // 是否覆盖之前的数据（true：每次都遍历所有文件，重新生成数据。false：将新数据追加到旧数据后面）
       overwrite: true,
-      // 需要解析的标签（数量和顺序要和下面的 thead 保持一致）
       signs: ['id', 'title', 'level', 'lang', 'tags', 'similars'],
-      // 表格头（Markdown 语法）
-      thead: `|#|题目|难度|解答|标签|相似|\n|:---:|:---|:---:|:---:|:---:|:---:|`,
-      // 生成数据的标记点
+      thead: `|#|Title|Level|Lang|Tags|Similars|\n|:---:|:---|:---:|:---:|:---:|:---:|`,
       marker: {
         start: '<!-- @tb-start -->',
         end: '<!-- @tb-end -->',
@@ -189,34 +213,34 @@ export default class TBuilder {
     };
 
     this.opts = Object.assign({}, DEFAULT_OPTION, options);
-    // only used when `opts.overwrite == true`
-    // keep last table data, and pass to next generation.
     this.cache = '';
   }
 
-  build({
-    sourcePath,
-    targetPath,
-    context,
-  }: {
-    sourcePath: string;
-    targetPath: string;
-    context: any;
-  }): void {
-    if (!sourcePath || !targetPath) {
-      console.error('TBuilder ERR!: please pass parameters.');
+  /**
+   * Generate table data from some comments.
+   * @param sourcePath The path to the file that needs to be parsed.
+   * @param targetPath The file path to store the generated data.
+   */
+  build(sourcePath: string, targetPath = './README.md'): void {
+    if (!sourcePath) {
+      console.error(`TBuilder ERR!: please pass in parameters.`);
+      return;
+    }
+    if (!fse.existsSync(sourcePath)) {
+      console.error(`TBuilder ERR!: path "${sourcePath}" is not exist.`);
       return;
     }
 
     const paths = readPath(sourcePath, sourcePath);
 
     if (!paths || !paths.length) {
-      console.error('TBuilder ERR!: directory is empty.');
+      console.error(`TBuilder ERR!: directory "${sourcePath}" is empty.`);
+      return;
     }
 
-    if (Array.isArray(paths) && paths.length) {
-      paths.forEach((sourcePath: string) => {
-        parseComment({ sourcePath, targetPath, context });
+    if (Array.isArray(paths)) {
+      paths.forEach((path: string) => {
+        parseComment(path, targetPath, this);
       });
     }
   }
