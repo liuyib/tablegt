@@ -1,6 +1,6 @@
 {
   "name": "tbuilder",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Generate tabular data by code comments",
   "main": "tbuilder.js",
   "jsdelivr": "dist/tbuilder.js",
