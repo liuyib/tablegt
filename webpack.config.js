@@ -8,6 +8,8 @@ module.exports = {
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
+    library: 'TBuilder',
+    libraryTarget: 'commonjs2',
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],

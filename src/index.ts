@@ -1,5 +1,6 @@
-import fse from 'fs-extra';
-import comments from 'comment-parser';
+/* eslint-disable @typescript-eslint/no-var-requires */
+const fse = require('fs-extra');
+const comments = require('comment-parser');
 
 interface IStoreParse {
   id?: string | number;
@@ -185,7 +186,7 @@ const readPath = function readPath(path: string, trace: string): any {
  *     context: tbuilder,
  *   });
  */
-export default class TBuilder {
+class TBuilder {
   // Configuration item.
   public opts: any;
   // The cache data, only be used when `opts.overwrite` is true.
@@ -245,3 +246,5 @@ export default class TBuilder {
     }
   }
 }
+
+module.exports = TBuilder;
