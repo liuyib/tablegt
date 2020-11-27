@@ -1,14 +1,14 @@
 # TBuilder
 
-Languages: [English](./README.md) | [中文简体](./README-zh_CN.md)
+语言：[English](./README.md) | [中文简体](./README-zh_CN.md)
 
-## 🔮 What is TBuilder?
+## 🔮 什么是 TBuilder？
 
 ![TBuilder - what-is-tbuilder](./assets/what-is-tbuilder.png)
 
-## ✨ Example
+## ✨ 示例
 
-There are some files:
+这里有一些文件：
 
 ```
 ~- source
@@ -52,34 +52,34 @@ There are some files:
  */
 ```
 
-TBuilder can use `@XX` sign to automatically generate table data:
+TBuilder 可以使用 `@XX` 标记，来自动生成表格数据：
 
 ![TBuilder - demo](./assets/demo.png)
 
-## 📃 Documentation
+## 📃 文档
 
 - **`new TBuilder(opts)`**
 
-  |Parameter|Description|Type|Required|Default value|
+  |参数|说明|类型|必选|默认值|
   |:--|:--|:--:|:--:|:--:|
-  |`opts.overwrite`|whether to overwrite old data|boolean|`false`|`true`|
-  |`opts.signs`|signs that needs to be parsed|array|`false`|`['id', 'title', 'level', 'lang', 'tags', 'similars']`|
-  |`opts.thead`|table header code (Markdown syntax)|string|`false`|`|#|Title|Level|Lang|Tags|Similars|\n|:---:|:---|:---:|:---:|:---:|:---:|`|
-  |`opts.marker.start`|start marker|string|`false`|`<!-- @tb-start -->`|
-  |`opts.marker.end`|start marker|string|`false`|`<!-- @tb-end -->`|
+  |`opts.overwrite`|是否覆盖旧的数据|boolean|否|`true`|
+  |`opts.signs`|需要解析的标记|array|否|`['id', 'title', 'level', 'lang', 'tags', 'similars']`|
+  |`opts.thead`|表格头代码（Markdown 语法）|string|否|`|#|Title|Level|Lang|Tags|Similars|\n|:---:|:---|:---:|:---:|:---:|:---:|`|
+  |`opts.marker.start`|开始定位标记|string|否|`<!-- @tb-start -->`|
+  |`opts.marker.end`|终止定位标记|string|否|`<!-- @tb-end -->`|
 
 - `build(sourceFile, outputFile)`
 
-  Parse the signs in the comments to generate tabular data.
+  解析注释中的标记，生成表格数据。
 
-  |Parameter|Description|Type|Required|Default value|
+  |参数|说明|类型|必选|默认值|
   |:--|:--|:--:|:--:|:--:|:--:|
-  |`sourceFile`|The path of the file that needs to be parsed|string|`true`|-|
-  |`outputFile`|The file path to store the generated data|string|`false`|`./README.md`|
+  |`sourceFile`|需要解析的文件路径|string|是|-|
+  |`outputFile`|存储生成数据的文件的路径|string|否|`./README.md`|
 
-## 🔨 Usage
+## 🔨 使用
 
-- Basic usage
+- 基础用法
 
   ```js
   const TBuilder = require('TBuilder');
@@ -88,7 +88,7 @@ TBuilder can use `@XX` sign to automatically generate table data:
   tbuilder.build('./source/');
   ```
 
-- Specify table header
+- 指定表格头
 
   ```js
   const TBuilder = require('TBuilder');
@@ -100,7 +100,7 @@ TBuilder can use `@XX` sign to automatically generate table data:
   tbuilder.build('./source/');
   ```
 
-- Specify location marker
+- 指定定位标记
 
   ```js
   const TBuilder = require('TBuilder');
@@ -114,7 +114,7 @@ TBuilder can use `@XX` sign to automatically generate table data:
   tbuilder.build('./source/');
   ```
 
-- Specify output file
+- 指定输出文件
 
   ```js
   const TBuilder = require('TBuilder');
@@ -123,6 +123,6 @@ TBuilder can use `@XX` sign to automatically generate table data:
   tbuilder.build('./source/', './table.md');
   ```
 
-## 🤝 LICENSE
+## 🤝 开源协议
 
 [MIT](https://github.com/liuyib/tbuilder/blob/master/LICENSE)
