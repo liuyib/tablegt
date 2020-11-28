@@ -175,9 +175,10 @@ const readPath = function readPath(path: string, trace: string): any {
 
 /**
  * @example
+ *   const TableGT = require('tablegt');
  *   const tablegt = new TableGT({
  *     signs: ['id', 'title'],
- *     thead: '|#|题目|\n|:---:|:---:|',
+ *     thead: '| # | Title |\n| :---: | :---: |',
  *   });
  *
  *   tablegt.build('./source');
@@ -202,7 +203,7 @@ class TableGT {
     const DEFAULT_OPTION = {
       overwrite: true,
       signs: ['id', 'title', 'level', 'lang', 'tags', 'similars'],
-      thead: `|#|Title|Level|Lang|Tags|Similars|\n|:---:|:---|:---:|:---:|:---:|:---:|`,
+      thead: `| # | Title | Level | Lang | Tags | Similars |\n| :---: | :--- | :---: | :---: | :---: | :---: |`,
       marker: {
         start: '<!-- @tb-start -->',
         end: '<!-- @tb-end -->',

@@ -73,22 +73,22 @@ tablegt.build('./source');
 
 - **`new TableGT(opts)`**
 
-  |参数|说明|类型|必选|默认值|
-  |:--|:--|:--:|:--:|:--:|
-  |`opts.overwrite`|是否覆盖旧的数据|boolean|否|`true`|
-  |`opts.signs`|需要解析的标记|array|否|`['id', 'title', 'level', 'lang', 'tags', 'similars']`|
-  |`opts.thead`|表格头代码（Markdown 语法）|string|否| `\|#\|Title\|Level\|Lang\|Tags\|Similars\|\n\|:---:\|:---\|:---:\|:---:\|:---:\|:---:\|` |
-  |`opts.marker.start`|开始定位标记|string|否|`<!-- @tb-start -->`|
-  |`opts.marker.end`|终止定位标记|string|否|`<!-- @tb-end -->`|
+  | 参数 | 说明 | 类型 | 必选 | 默认值 |
+  | :--- | :--- | :---: | :---: | :---: |
+  | `opts.overwrite` | 是否覆盖旧的数据 | boolean | 否 | `true` |
+  | `opts.signs` | 需要解析的标记 | array | 否 | `['id', 'title', 'level', 'lang', 'tags', 'similars']` |
+  | `opts.thead` | 表格头代码（Markdown 语法） | string | 否 | `\| # \| Title \| Level \| Lang \| Tags \| Similars \|\n\| :---: \| :--- \| :---: \| :---: \| :---: \| :---: \|` |
+  | `opts.marker.start` | 开始定位标记 | string | 否 | `<!-- @tb-start -->` |
+  | `opts.marker.end` | 终止定位标记 | string | 否 | `<!-- @tb-end -->` |
 
 - `build(source, target)`
 
   解析注释中的标记，生成表格数据。
 
-  |参数|说明|类型|必选|默认值|
-  |:--|:--|:--:|:--:|:--:|
-  |`source`|需要解析的文件路径|string|是|-|
-  |`target`|存储生成数据的文件的路径|string|否|`./README.md`|
+  | 参数 | 说明 | 类型 | 必选 | 默认值 |
+  | :--- | :--- | :---: | :---: | :---: |
+  | `source` | 需要解析的文件路径 | string | 是 | - |
+  | `target` | 存储生成数据的文件的路径 | string | 否 | `./README.md` |
 
 ## 🔨 使用
 
@@ -107,7 +107,7 @@ tablegt.build('./source');
   const TableGT = require('tablegt');
   const tablegt = new TableGT({
     signs: ['id', 'title'],
-    thead: '|#|Title|\n|:---:|:---:|',
+    thead: '| # | Title |\n| :---: | :---: |',
   });
 
   tablegt.build('./source/');
