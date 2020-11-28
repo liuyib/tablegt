@@ -1,10 +1,10 @@
-# TBuilder
+# TableGT
 
 Languages: [English](./README.md) | [中文简体](./README-zh_CN.md)
 
-## 🔮 What is TBuilder?
+## 🔮 What is TableGT?
 
-![TBuilder - what-is-tbuilder](./assets/what-is-tbuilder.png)
+![TableGT - what-is-tablegt](./assets/what-is-tablegt.png)
 
 ## ✨ Example
 
@@ -52,13 +52,13 @@ There are some files:
  */
 ```
 
-TBuilder can use `@XX` sign to automatically generate table data:
+TableGT can use `@XX` sign to automatically generate table data:
 
-![TBuilder - demo](./assets/demo.png)
+![TableGT - demo](./assets/demo.png)
 
 ## 📃 Documentation
 
-- **`new TBuilder(opts)`**
+- **`new TableGT(opts)`**
 
   |Parameter|Description|Type|Required|Default value|
   |:--|:--|:--:|:--:|:--:|
@@ -68,61 +68,61 @@ TBuilder can use `@XX` sign to automatically generate table data:
   |`opts.marker.start`|start marker|string|`false`|`<!-- @tb-start -->`|
   |`opts.marker.end`|start marker|string|`false`|`<!-- @tb-end -->`|
 
-- `build(sourceFile, outputFile)`
+- `build(source, target)`
 
   Parse the signs in the comments to generate tabular data.
 
   |Parameter|Description|Type|Required|Default value|
   |:--|:--|:--:|:--:|:--:|:--:|
-  |`sourceFile`|The path of the file that needs to be parsed|string|`true`|-|
-  |`outputFile`|The file path to store the generated data|string|`false`|`./README.md`|
+  |`source`|The path of the file that needs to be parsed|string|`true`|-|
+  |`target`|The file path to store the generated data|string|`false`|`./README.md`|
 
 ## 🔨 Usage
 
 - Basic usage
 
   ```js
-  const TBuilder = require('TBuilder');
-  const tbuilder = new TBuilder();
+  const TableGT = require('TableGT');
+  const tablegt = new TableGT();
 
-  tbuilder.build('./source/');
+  tablegt.build('./source/');
   ```
 
 - Specify table header
 
   ```js
-  const TBuilder = require('TBuilder');
-  const tbuilder = new TBuilder({
+  const TableGT = require('TableGT');
+  const tablegt = new TableGT({
     signs: ['id', 'title'],
     thead: '|#|Title|\n|:---:|:---:|',
   });
 
-  tbuilder.build('./source/');
+  tablegt.build('./source/');
   ```
 
 - Specify location marker
 
   ```js
-  const TBuilder = require('TBuilder');
-  const tbuilder = new TBuilder({
+  const TableGT = require('TableGT');
+  const tablegt = new TableGT({
     marker: {
       start: '// @tb-start',
       end: '// @tb-end',
     },
   });
 
-  tbuilder.build('./source/');
+  tablegt.build('./source/');
   ```
 
-- Specify output file
+- Specify target file
 
   ```js
-  const TBuilder = require('TBuilder');
-  const tbuilder = new TBuilder();
+  const TableGT = require('TableGT');
+  const tablegt = new TableGT();
 
-  tbuilder.build('./source/', './table.md');
+  tablegt.build('./source/', './table.md');
   ```
 
 ## 🤝 LICENSE
 
-[MIT](https://github.com/liuyib/tbuilder/blob/master/LICENSE)
+[MIT](https://github.com/liuyib/tablegt/blob/master/LICENSE)

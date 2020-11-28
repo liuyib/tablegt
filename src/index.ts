@@ -63,13 +63,13 @@ const parseComment = function parseComment(
     },
     (error: any, data: any, finish: any) => {
       if (error && error.message) {
-        console.error(`TBuilder ERR!: ${error.message}`);
+        console.error(`TableGT ERR!: ${error.message}`);
       }
 
       if (data) {
         if (!Object.keys(store).length) {
           console.warn(
-            `TBuilder WARN: can't find valid MARKER in "${sourcePath}"`,
+            `TableGT WARN: can't find valid MARKER in "${sourcePath}"`,
           );
           return;
         }
@@ -128,9 +128,9 @@ const parseComment = function parseComment(
 
         const newFileContent = beforeTable + insertContent + afterTable;
 
-        console.info(`TBuilder INFO: start parse "${sourcePath}" file`);
+        console.info(`TableGT INFO: start parse "${sourcePath}" file`);
         fse.writeFileSync(targetPath, newFileContent, { encoding: 'utf8' });
-        console.info('TBuilder DONE: table generate successfully!');
+        console.info('TableGT DONE: table generate successfully!');
       }
 
       if (finish) {
@@ -175,18 +175,14 @@ const readPath = function readPath(path: string, trace: string): any {
 
 /**
  * @example
- *   const tbuilder = new TBuilder({
+ *   const tablegt = new TableGT({
  *     signs: ['id', 'title'],
  *     thead: '|#|题目|\n|:---:|:---:|',
  *   });
  *
- *   tbuilder.build({
- *     sourcePath: './javascript',
- *     targetPath: './README.md',
- *     context: tbuilder,
- *   });
+ *   tablegt.build('./source');
  */
-class TBuilder {
+class TableGT {
   // Configuration item.
   public opts: any;
   // The cache data, only be used when `opts.overwrite` is true.
@@ -224,18 +220,18 @@ class TBuilder {
    */
   build(sourcePath: string, targetPath = './README.md'): void {
     if (!sourcePath) {
-      console.error(`TBuilder ERR!: please pass in parameters.`);
+      console.error(`TableGT ERR!: please pass in parameters.`);
       return;
     }
     if (!fse.existsSync(sourcePath)) {
-      console.error(`TBuilder ERR!: path "${sourcePath}" is not exist.`);
+      console.error(`TableGT ERR!: path "${sourcePath}" is not exist.`);
       return;
     }
 
     const paths = readPath(sourcePath, sourcePath);
 
     if (!paths || !paths.length) {
-      console.error(`TBuilder ERR!: directory "${sourcePath}" is empty.`);
+      console.error(`TableGT ERR!: directory "${sourcePath}" is empty.`);
       return;
     }
 
@@ -247,4 +243,4 @@ class TBuilder {
   }
 }
 
-module.exports = TBuilder;
+module.exports = TableGT;

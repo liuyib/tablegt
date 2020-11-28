@@ -1,10 +1,10 @@
-# TBuilder
+# TableGT
 
 语言：[English](./README.md) | [中文简体](./README-zh_CN.md)
 
-## 🔮 什么是 TBuilder？
+## 🔮 什么是 TableGT？
 
-![TBuilder - what-is-tbuilder](./assets/what-is-tbuilder.png)
+![TableGT - what-is-tablegt](./assets/what-is-tablegt.png)
 
 ## ✨ 示例
 
@@ -52,13 +52,13 @@
  */
 ```
 
-TBuilder 可以使用 `@XX` 标记，来自动生成表格数据：
+TableGT 可以使用 `@XX` 标记，来自动生成表格数据：
 
-![TBuilder - demo](./assets/demo.png)
+![TableGT - demo](./assets/demo.png)
 
 ## 📃 文档
 
-- **`new TBuilder(opts)`**
+- **`new TableGT(opts)`**
 
   |参数|说明|类型|必选|默认值|
   |:--|:--|:--:|:--:|:--:|
@@ -68,61 +68,61 @@ TBuilder 可以使用 `@XX` 标记，来自动生成表格数据：
   |`opts.marker.start`|开始定位标记|string|否|`<!-- @tb-start -->`|
   |`opts.marker.end`|终止定位标记|string|否|`<!-- @tb-end -->`|
 
-- `build(sourceFile, outputFile)`
+- `build(source, target)`
 
   解析注释中的标记，生成表格数据。
 
   |参数|说明|类型|必选|默认值|
   |:--|:--|:--:|:--:|:--:|:--:|
-  |`sourceFile`|需要解析的文件路径|string|是|-|
-  |`outputFile`|存储生成数据的文件的路径|string|否|`./README.md`|
+  |`source`|需要解析的文件路径|string|是|-|
+  |`target`|存储生成数据的文件的路径|string|否|`./README.md`|
 
 ## 🔨 使用
 
 - 基础用法
 
   ```js
-  const TBuilder = require('TBuilder');
-  const tbuilder = new TBuilder();
+  const TableGT = require('tablegt');
+  const tablegt = new TableGT();
 
-  tbuilder.build('./source/');
+  tablegt.build('./source/');
   ```
 
 - 指定表格头
 
   ```js
-  const TBuilder = require('TBuilder');
-  const tbuilder = new TBuilder({
+  const TableGT = require('tablegt');
+  const tablegt = new TableGT({
     signs: ['id', 'title'],
     thead: '|#|Title|\n|:---:|:---:|',
   });
 
-  tbuilder.build('./source/');
+  tablegt.build('./source/');
   ```
 
 - 指定定位标记
 
   ```js
-  const TBuilder = require('TBuilder');
-  const tbuilder = new TBuilder({
+  const TableGT = require('tablegt');
+  const tablegt = new TableGT({
     marker: {
       start: '// @tb-start',
       end: '// @tb-end',
     },
   });
 
-  tbuilder.build('./source/');
+  tablegt.build('./source/');
   ```
 
 - 指定输出文件
 
   ```js
-  const TBuilder = require('TBuilder');
-  const tbuilder = new TBuilder();
+  const TableGT = require('tablegt');
+  const tablegt = new TableGT();
 
-  tbuilder.build('./source/', './table.md');
+  tablegt.build('./source/', './table.md');
   ```
 
 ## 🤝 开源协议
 
-[MIT](https://github.com/liuyib/tbuilder/blob/master/LICENSE)
+[MIT](https://github.com/liuyib/tablegt/blob/master/LICENSE)

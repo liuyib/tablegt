@@ -1,4 +1,4 @@
-const TBuilder = require('../dist/tbuilder.min.js');
-const tbuilder = new TBuilder();
+const TableGT = require('../dist/tablegt.js');
+const tablegt = new TableGT();
 
-tbuilder.build('./source');
+tablegt.build('./source');

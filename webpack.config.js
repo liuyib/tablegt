@@ -6,12 +6,12 @@ module.exports = {
   target: 'node',
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    tbuilder: './src/index.ts',
+    tablegt: './src/index.ts',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].min.js',
-    library: 'TBuilder',
+    library: 'TableGT',
     libraryTarget: 'commonjs2',
   },
   devtool: isDev ? '' : 'source-map',

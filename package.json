@@ -1,10 +1,10 @@
 {
-  "name": "tbuilder",
+  "name": "tablegt",
   "version": "0.3.0",
   "description": "Generate tabular data by code comments",
-  "main": "tbuilder.js",
-  "jsdelivr": "dist/tbuilder.js",
-  "unpkg": "dist/tbuilder.js",
+  "main": "tablegt.js",
+  "jsdelivr": "dist/tablegt.js",
+  "unpkg": "dist/tablegt.js",
   "scripts": {
     "dev": "webpack --watch",
     "test": "jest",
@@ -19,7 +19,7 @@
     }
   },
   "keywords": [
-    "tbuilder",
+    "tablegt",
     "generator",
     "algorithm",
     "table"
@@ -28,12 +28,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/liuyib/tbuilder"
+    "url": "https://github.com/liuyib/tablegt"
   },
   "bugs": {
-    "url": "https://github.com/liuyib/tbuilder/issues"
+    "url": "https://github.com/liuyib/tablegt/issues"
   },
-  "homepage": "https://github.com/liuyib/tbuilder",
+  "homepage": "https://github.com/liuyib/tablegt",
   "dependencies": {
     "@types/fs-extra": "^9.0.4",
     "comment-parser": "^0.7.6",
