@@ -11,9 +11,11 @@ Languages: [English](./README.md) | [中文简体](./README-zh_CN.md)
 There are some files:
 
 ```
-~- source
-   ├─ demo1.js
-   └─ demo2.js
+demo 
+  ├─ source
+  |  ├─ demo1.js
+  |  └─ demo2.js
+  └─ index.js
 ```
 
 `demo1.js`
@@ -52,7 +54,16 @@ There are some files:
  */
 ```
 
-TableGT can use `@XX` sign to automatically generate table data:
+`index.js`
+
+```js
+const TableGT = require('tablegt');
+const tablegt = new TableGT();
+
+tablegt.build('./source');
+```
+
+In the `demo` directory, run `node index.js`, and a `README.md` file will be generated. The contents of the file are as follows:
 
 ![TableGT - demo](./assets/demo.png)
 
@@ -64,7 +75,7 @@ TableGT can use `@XX` sign to automatically generate table data:
   |:--|:--|:--:|:--:|:--:|
   |`opts.overwrite`|whether to overwrite old data|boolean|`false`|`true`|
   |`opts.signs`|signs that needs to be parsed|array|`false`|`['id', 'title', 'level', 'lang', 'tags', 'similars']`|
-  |`opts.thead`|table header code (Markdown syntax)|string|`false`|`|#|Title|Level|Lang|Tags|Similars|\n|:---:|:---|:---:|:---:|:---:|:---:|`|
+  |`opts.thead`|table header code (Markdown syntax)|string|`false`| `\|#\|Title\|Level\|Lang\|Tags\|Similars\|\n\|:---:\|:--\-|:---:\|:---:\|:---:\|:---:\|` |
   |`opts.marker.start`|start marker|string|`false`|`<!-- @tb-start -->`|
   |`opts.marker.end`|start marker|string|`false`|`<!-- @tb-end -->`|
 
@@ -73,7 +84,7 @@ TableGT can use `@XX` sign to automatically generate table data:
   Parse the signs in the comments to generate tabular data.
 
   |Parameter|Description|Type|Required|Default value|
-  |:--|:--|:--:|:--:|:--:|:--:|
+  |:--|:--|:--:|:--:|:--:|
   |`source`|The path of the file that needs to be parsed|string|`true`|-|
   |`target`|The file path to store the generated data|string|`false`|`./README.md`|
 
@@ -82,7 +93,7 @@ TableGT can use `@XX` sign to automatically generate table data:
 - Basic usage
 
   ```js
-  const TableGT = require('TableGT');
+  const TableGT = require('tablegt');
   const tablegt = new TableGT();
 
   tablegt.build('./source/');
@@ -91,7 +102,7 @@ TableGT can use `@XX` sign to automatically generate table data:
 - Specify table header
 
   ```js
-  const TableGT = require('TableGT');
+  const TableGT = require('tablegt');
   const tablegt = new TableGT({
     signs: ['id', 'title'],
     thead: '|#|Title|\n|:---:|:---:|',
@@ -103,7 +114,7 @@ TableGT can use `@XX` sign to automatically generate table data:
 - Specify location marker
 
   ```js
-  const TableGT = require('TableGT');
+  const TableGT = require('tablegt');
   const tablegt = new TableGT({
     marker: {
       start: '// @tb-start',
@@ -117,7 +128,7 @@ TableGT can use `@XX` sign to automatically generate table data:
 - Specify target file
 
   ```js
-  const TableGT = require('TableGT');
+  const TableGT = require('tablegt');
   const tablegt = new TableGT();
 
   tablegt.build('./source/', './table.md');
