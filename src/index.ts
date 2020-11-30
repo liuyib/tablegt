@@ -13,6 +13,74 @@ interface IStoreParse {
   [prop: string]: any;
 }
 
+const parseSignWithModifier = function parseSignWithModifier(
+  str: string,
+  modifiers: string[],
+): any {
+  interface IModifier {
+    raw: (str: string) => string[];
+    quote: (str: string) => string[];
+    comma: (str: string) => string[];
+    code: (str: string) => string[];
+    [prop: string]: (str: string) => string[];
+  }
+
+  // Keep the origin string.
+  const MODIFIER_RAW = 'raw';
+  // Get the characters between quotes.
+  const MODIFIER_QUOTE = 'quote';
+  // Split the string with comma.
+  const MODIFIER_COMMA = 'comma';
+  // Use ` to wrap the processed characters.
+  const MODIFIER_CODE = 'code';
+  // Default modifier.
+  const MODIFIER_DEFAULT = MODIFIER_COMMA;
+
+  const MODIFIER: IModifier = {
+    [MODIFIER_RAW]: (str: string) => [str],
+    [MODIFIER_QUOTE]: (str: string) => {
+      return str
+        .split(/['"]([^'"]+)['"]/gim)
+        .filter((v: string) => !/^\s+$/.test(v) && v);
+    },
+    [MODIFIER_COMMA]: (str: string) => {
+      return str
+        .split(',')
+        .filter((v) => !/^\s+$/.test(v) && v)
+        .map((v) => v.trim());
+    },
+    [MODIFIER_CODE]: (str: string) => {
+      return [`\`${str}\``];
+    },
+  };
+
+  if (modifiers.includes(MODIFIER_RAW)) {
+    return str;
+  }
+
+  if (modifiers && modifiers.length === 0) {
+    modifiers.push(MODIFIER_DEFAULT);
+  }
+
+  // Filter data layer by layer through modifiers.
+  let pipeline: string | string[] = str;
+  modifiers.forEach((modifier) => {
+    if (typeof pipeline === 'string') {
+      pipeline = MODIFIER[modifier](str);
+    } else {
+      const pipes: string[] = [];
+
+      pipeline.forEach((pipe) => {
+        pipes.push(...MODIFIER[modifier](pipe));
+      });
+
+      pipeline = pipes;
+    }
+  });
+
+  return pipeline;
+};
+
 /**
  * Parse the specified file and generate table data.
  * @param sourcePath The path to the file that needs to be parsed.
@@ -33,27 +101,39 @@ const parseComment = function parseComment(
     {
       parsers: [
         function parseTag(str: string) {
+          // Special parse for `@lc` signs.
           if (/^@lc[\s\S]*/.test(str)) {
             const lines = str.split(/\n/).filter((v) => v);
             const first = lines[0].split(/\s/).filter((v) => v);
             const second = lines[1].split(/\s/).filter((v) => v);
 
-            const id = first[2].replace('id=', '');
-            const lang = first[3].replace('lang=', '');
-            const title = second.slice(1).join(' ');
-            const uri = lines[2];
+            const lc_id = first[2].replace('id=', '');
+            const lc_title = second.slice(1).join(' ');
+            const lc_uri = lines[2];
+            const lc_lang = first[3].replace('lang=', '');
 
-            Object.assign(store, { id, title, uri, lang });
+            Object.assign(store, { lc_id, lc_title, lc_uri, lc_lang });
           }
 
-          ['level', 'tags', 'similars'].forEach((type: string) => {
-            if (new RegExp(`^@${type}[\\s\\S]*`).test(str)) {
-              const keys = str
-                .split(/['"]([^'"]+)['"]/gi)
-                .filter((key) => !/^\s+$/.test(key) && key !== '')
-                .slice(1);
+          opts.signs.forEach((sign: string) => {
+            // Not a specified sign in a namespace.
+            if (!/^@[\s\S]*/.test(sign)) {
+              const splitSign = sign.split('.');
+              const modifiers = splitSign.slice(1);
 
-              Object.assign(store, { [type]: keys });
+              // Remove modifiers of option.
+              if (modifiers && modifiers.length !== 0) {
+                sign = splitSign[0];
+              }
+
+              // Match sign with the @ prefix.
+              if (new RegExp(`^@${sign}\\b([^@]*)`).test(str)) {
+                const keys: string[] = parseSignWithModifier(
+                  RegExp.$1.trim(),
+                  modifiers,
+                );
+                Object.assign(store, { [sign]: keys.join(', ') });
+              }
             }
           });
 
@@ -89,32 +169,16 @@ const parseComment = function parseComment(
           .slice(startPos + opts.marker.start.length, endPos)
           .trim();
         const sign: IStoreParse = {
-          id: store.id || '',
-          title: `[${store.title}](${store.uri})`,
-          level: store.level || '',
-          lang: `[${store.lang}](${sourcePath})`,
-          tags: '',
-          similars: '',
+          ...store,
+          lc_title: `[${store.lc_title}](${store.lc_uri})`,
+          lc_lang: `[${store.lc_lang}](${sourcePath})`,
         };
-
-        if (Array.isArray(store.tags) && store.tags.length) {
-          store.tags.forEach((tag: string) => {
-            sign.tags += `\`${tag}\`, `;
-          });
-          sign.tags = sign.tags.trim().slice(0, -1);
-        }
-        if (Array.isArray(store.similars) && store.similars.length) {
-          store.similars.forEach((similar: string) => {
-            sign.similars += `\`${similar}\`, `;
-          });
-          sign.similars = sign.similars.trim().slice(0, -1);
-        }
 
         // According to the enabled SIGN, generate data sequentially.
         let newTable = '|';
-        opts.signs.forEach((key: string) => {
-          newTable += `${sign[key]}|`;
-        });
+        opts.signs
+          .map((v: string) => v.split('.')[0])
+          .forEach((key: string) => sign[key] && (newTable += `${sign[key]}|`));
 
         if (opts.overwrite) {
           context.cache = `${context.cache}${newTable}\n`;
@@ -124,7 +188,7 @@ const parseComment = function parseComment(
         insertContent += `${opts.marker.start}\n`;
         insertContent += `${opts.overwrite ? opts.thead : oldTable}\n`;
         insertContent += `${opts.overwrite ? context.cache : newTable}`;
-        insertContent += `\n${opts.marker.end}`;
+        insertContent += `${opts.overwrite ? '' : '\n'}${opts.marker.end}`;
 
         const newFileContent = beforeTable + insertContent + afterTable;
 
@@ -190,7 +254,7 @@ class TableGT {
   // Keep the previous table data and pass it to the next generation.
   public cache: string;
 
-  constructor(options: unknown) {
+  constructor(options: any) {
     /**
      * Default configuration.
      * @param {boolean} overwrite     Whether to overwrite old data.
@@ -202,7 +266,14 @@ class TableGT {
      */
     const DEFAULT_OPTION = {
       overwrite: true,
-      signs: ['id', 'title', 'level', 'lang', 'tags', 'similars'],
+      signs: [
+        'lc_id',
+        'lc_title',
+        'level',
+        'lc_lang',
+        'tags.comma.code',
+        'similars.comma.code',
+      ],
       thead: `| # | Title | Level | Lang | Tags | Similars |\n| :---: | :--- | :---: | :---: | :---: | :---: |`,
       marker: {
         start: '<!-- @tb-start -->',
