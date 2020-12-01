@@ -55,7 +55,7 @@ const parseSignWithModifier = function parseSignWithModifier(
   };
 
   if (modifiers.includes(MODIFIER_RAW)) {
-    return str;
+    return MODIFIER[MODIFIER_RAW](str);
   }
 
   if (modifiers && modifiers.length === 0) {
@@ -132,6 +132,7 @@ const parseComment = function parseComment(
                   RegExp.$1.trim(),
                   modifiers,
                 );
+
                 Object.assign(store, { [sign]: keys.join(', ') });
               }
             }
@@ -237,16 +238,6 @@ const readPath = function readPath(path: string, trace: string): any {
   return paths;
 };
 
-/**
- * @example
- *   const TableGT = require('tablegt');
- *   const tablegt = new TableGT({
- *     signs: ['id', 'title'],
- *     thead: '| # | Title |\n| :---: | :---: |',
- *   });
- *
- *   tablegt.build('./source');
- */
 class TableGT {
   // Configuration item.
   public opts: any;
