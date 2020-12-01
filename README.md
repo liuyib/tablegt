@@ -71,7 +71,7 @@ const tablegt = new TableGT();
 tablegt.build('./source');
 ```
 
-In the `demo` directory, run `node index.js`, and a `README.md` file will be generated. The contents of the file are as follows:
+In the `demo` directory, run `node index.js` command, and a `README.md` file will be generated. The contents of the file are as follows:
 
 ![TableGT - demo](./assets/demo.png)
 
