@@ -2,9 +2,17 @@
 
 Languages: [English](./README.md) | [中文简体](./README-zh_CN.md)
 
-## 🔮 What is TableGT?
+## 🤔 What is TableGT?
 
 ![TableGT - what-is-tablegt](./assets/what-is-tablegt.png)
+
+## 💖 Who is using TableGT?
+
+- [https://github.com/liuyib/leetcode](https://github.com/liuyib/leetcode)
+
+## 🚀 Quick experience
+
+Download the repository to the local, then enter the `demo` directory, run `node index.js`, and you will see the generated table data in the `README.md` under the `demo` directory.
 
 ## ✨ Example
 

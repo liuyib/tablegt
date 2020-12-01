@@ -2,9 +2,17 @@
 
 语言：[English](./README.md) | [中文简体](./README-zh_CN.md)
 
-## 🔮 什么是 TableGT？
+## 🤔 什么是 TableGT？
 
 ![TableGT - what-is-tablegt](./assets/what-is-tablegt.png)
+
+## 💖 谁在使用？
+
+- [https://github.com/liuyib/leetcode](https://github.com/liuyib/leetcode)
+
+## 🚀 快速体验
+
+将该仓库下载到本地，然后进入 `demo` 目录，执行 `node index.js`，然后就可以在 `demo` 目录下的 `README.md` 中看到生成的表格数据。
 
 ## ✨ 示例
 
