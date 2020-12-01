@@ -116,25 +116,19 @@ const parseComment = function parseComment(
           }
 
           opts.signs.forEach((sign: string) => {
-            // Not a specified sign in a namespace.
-            if (!/^@[\s\S]*/.test(sign)) {
-              const splitSign = sign.split('.');
-              const modifiers = splitSign.slice(1);
+            const splitSign = sign.split('.');
+            const modifiers = splitSign.slice(1);
+            let keywords: string[] = [];
 
-              // Remove modifiers of option.
-              if (modifiers && modifiers.length !== 0) {
-                sign = splitSign[0];
-              }
+            // Remove modifiers of option.
+            if (modifiers && modifiers.length !== 0) {
+              sign = splitSign[0];
+            }
 
-              // Match sign with the @ prefix.
-              if (new RegExp(`^@${sign}\\b([^@]*)`).test(str)) {
-                const keys: string[] = parseSignWithModifier(
-                  RegExp.$1.trim(),
-                  modifiers,
-                );
-
-                Object.assign(store, { [sign]: keys.join(', ') });
-              }
+            // Match sign with the @ prefix.
+            if (new RegExp(`^@${sign}\\b([^@]*)`).test(str)) {
+              keywords = parseSignWithModifier(RegExp.$1.trim(), modifiers);
+              Object.assign(store, { [sign]: keywords.join(', ') });
             }
           });
 
@@ -177,9 +171,9 @@ const parseComment = function parseComment(
 
         // According to the enabled SIGN, generate data sequentially.
         let newTable = '|';
-        opts.signs
-          .map((v: string) => v.split('.')[0])
-          .forEach((key: string) => sign[key] && (newTable += `${sign[key]}|`));
+        opts.signsNoModifier.forEach((s: string) => {
+          newTable += ` ${sign[s] ? sign[s] : ''} |`;
+        });
 
         if (opts.overwrite) {
           context.cache = `${context.cache}${newTable}\n`;
@@ -239,41 +233,45 @@ const readPath = function readPath(path: string, trace: string): any {
 };
 
 class TableGT {
+  /**
+   * Default configuration.
+   * @param {boolean} overwrite     Whether to overwrite old data.
+   * @param {Array}   signs         Parsable sign.
+   * @param {string}  thead         Table header (Markdown syntax).
+   * @param {Object}  marker        Marking point, where data is generated.
+   * @param {string}  marker.start
+   * @param {string}  marker.end
+   */
+  private DEFAULT_OPTION = {
+    overwrite: true,
+    signs: [
+      'lc_id',
+      'lc_title',
+      'level',
+      'lc_lang',
+      'tags.comma.code',
+      'similars.comma.code',
+    ],
+    thead: `| # | Title | Level | Lang | Tags | Similars |\n| :---: | :--- | :---: | :---: | :---: | :---: |`,
+    marker: {
+      start: '<!-- @tb-start -->',
+      end: '<!-- @tb-end -->',
+    },
+  };
   // Configuration item.
   public opts: any;
   // The cache data, only be used when `opts.overwrite` is true.
   // Keep the previous table data and pass it to the next generation.
-  public cache: string;
+  public cache = '';
 
   constructor(options: any) {
-    /**
-     * Default configuration.
-     * @param {boolean} overwrite     Whether to overwrite old data.
-     * @param {Array}   signs         Parsable sign.
-     * @param {string}  thead         Table header (Markdown syntax).
-     * @param {Object}  marker        Marking point, where data is generated.
-     * @param {string}  marker.start
-     * @param {string}  marker.end
-     */
-    const DEFAULT_OPTION = {
-      overwrite: true,
-      signs: [
-        'lc_id',
-        'lc_title',
-        'level',
-        'lc_lang',
-        'tags.comma.code',
-        'similars.comma.code',
-      ],
-      thead: `| # | Title | Level | Lang | Tags | Similars |\n| :---: | :--- | :---: | :---: | :---: | :---: |`,
-      marker: {
-        start: '<!-- @tb-start -->',
-        end: '<!-- @tb-end -->',
-      },
-    };
+    this.init(options);
+  }
 
-    this.opts = Object.assign({}, DEFAULT_OPTION, options);
-    this.cache = '';
+  private init(options: any): void {
+    this.opts = Object.assign({}, this.DEFAULT_OPTION, options);
+    const signsNoModifier = this.opts.signs.map((s: string) => s.split('.')[0]);
+    this.opts.signsNoModifier = signsNoModifier;
   }
 
   /**
@@ -281,7 +279,7 @@ class TableGT {
    * @param sourcePath The path to the file that needs to be parsed.
    * @param targetPath The file path to store the generated data.
    */
-  build(sourcePath: string, targetPath = './README.md'): void {
+  public build(sourcePath: string, targetPath = './README.md'): void {
     if (!sourcePath) {
       console.error(`TableGT ERR!: please pass in parameters.`);
       return;
