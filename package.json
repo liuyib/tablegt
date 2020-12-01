@@ -1,6 +1,6 @@
 {
   "name": "tablegt",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Generate tabular data by code comments",
   "main": "dist/tablegt.min.js",
   "jsdelivr": "dist/tablegt.min.js",
